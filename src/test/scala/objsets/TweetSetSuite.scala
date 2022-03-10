@@ -18,15 +18,9 @@ class TweetSetSuite extends munit.FunSuite:
 
   def size(set: TweetSet): Int = asSet(set).size
 
-//  test("contains: b") {
-//    new TestSets:
-//      val as = set3.contains(Tweet("b", "b body", 20))
-//      println(as)
-//  }
-
   test("filter: on empty set") {
     new TestSets:
-      assertEquals(size(set3.filter(tw => tw.user == "a")), 0)
+      assertEquals(size(set1.filter(tw => tw.user == "a")), 0)
   }
 
   test("filter: a on set5") {
@@ -35,7 +29,6 @@ class TweetSetSuite extends munit.FunSuite:
   }
 
   test("filter: twenty on set5") {
-
     new TestSets:
       assertEquals(size(set5.filter(tw => tw.retweets == 20)), 2)
   }
