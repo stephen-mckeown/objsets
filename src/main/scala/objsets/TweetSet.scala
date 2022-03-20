@@ -64,7 +64,7 @@ abstract class TweetSet extends TweetSetInterface:
    * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def mostRetweeted: Tweet = ???
+  def mostRetweeted: Tweet
 
   /**
    * Returns a list containing all tweets of this set, sorted by retweet count
@@ -75,7 +75,7 @@ abstract class TweetSet extends TweetSetInterface:
    * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def descendingByRetweet: TweetList = ???
+  def descendingByRetweet: TweetList
 
   /**
    * The following methods are already implemented
@@ -104,9 +104,11 @@ abstract class TweetSet extends TweetSetInterface:
    */
   def foreach(f: Tweet => Unit): Unit
 
+  def mostRetweetedAccumulator(acc: Tweet) : Tweet
+
 class Empty extends TweetSet:
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
-
+//def union(that: TweetSet): TweetSet = that
   override def toString = "."
   /**
    * The following methods are already implemented
@@ -120,6 +122,12 @@ class Empty extends TweetSet:
 
   def foreach(f: Tweet => Unit): Unit = ()
 
+  def mostRetweeted: Tweet = throw new NoSuchElementException("Applying mostRetweeted method to an empty set")
+
+  def mostRetweetedAccumulator(acc: Tweet) = acc
+
+  def descendingByRetweet: TweetList = Nil
+
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet:
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet =
@@ -128,6 +136,14 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet:
     } else {
       right.filterAcc(p, left.filterAcc(p, acc))
     }
+
+  //def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
+  //		var res = acc
+  //		foreach(t => if(p(t)) res = res incl t)
+  //		res
+  //	}
+
+  //def union(that: TweetSet): TweetSet = filterAcc(t => !that.contains(t), that)
 
   override def toString = "{"+left+elem+right+"}"
   /**
@@ -161,6 +177,19 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet:
     f(elem)
     left.foreach(f)
     right.foreach(f)
+
+  def mostRetweeted: Tweet =
+    mostRetweetedAccumulator(elem)
+
+  def mostRetweetedAccumulator(acc: Tweet): Tweet =
+    if (acc.retweets > elem.retweets)
+      left.mostRetweetedAccumulator(right.mostRetweetedAccumulator(acc))
+    else
+      left.mostRetweetedAccumulator(right.mostRetweetedAccumulator(elem))
+
+  def descendingByRetweet: TweetList =
+    new Cons(mostRetweeted,remove(mostRetweeted).descendingByRetweet)
+
 
 trait TweetList:
   def head: Tweet
